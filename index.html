@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ML Model Deployment · GCP & AWS Platform</title>
+  <meta name="description" content="Enterprise ML Model Deployment Dashboard for Google Cloud Platform and Amazon Web Services. Monitor, deploy, and manage machine learning models at scale." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-canvas">
+    <canvas id="particleCanvas"></canvas>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#lg1)" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M2 17l10 5 10-5" stroke="url(#lg2)" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M2 12l10 5 10-5" stroke="url(#lg3)" stroke-width="1.5" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="lg1" x1="2" y1="7" x2="22" y2="7" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7c3aed"/>
+                <stop offset="1" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="lg2" x1="2" y1="17" x2="22" y2="17" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7c3aed"/>
+                <stop offset="1" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="lg3" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7c3aed"/>
+                <stop offset="1" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">ML Deploy</span>
+          <span class="logo-sub">Cloud Platform</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="cloud-switcher">
+      <button class="cloud-btn active" id="gcpBtn" onclick="switchCloud('gcp')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 6.08c3.23 0 6.05 1.47 7.93 3.77L23 6.78C20.66 3.43 16.58 1 12 1 7.43 1 3.35 3.43 1 6.78l3.07 3.07C5.95 7.55 8.77 6.08 12 6.08z" fill="#EA4335"/>
+          <path d="M22.99 12c0-.88-.09-1.74-.25-2.57L12 9.43v4.57h6.15c-.65 3.06-2.86 5.39-5.75 6.43l3.1 3.1C19.36 21.44 22.99 17.1 22.99 12z" fill="#4285F4"/>
+          <path d="M5.09 15.77C4.72 14.6 4.5 13.33 4.5 12c0-1.33.22-2.6.59-3.77L2.01 5.18C.72 7.18 0 9.51 0 12c0 2.49.72 4.82 2.01 6.82l3.08-3.05z" fill="#FBBC05"/>
+          <path d="M12 23c3.23 0 6.05-1.23 8.12-3.23l-3.1-3.1C15.71 17.55 13.95 18 12 18c-3.45 0-6.36-2.33-7.37-5.5L1.51 15.6C3.85 19.75 7.67 23 12 23z" fill="#34A853"/>
+        </svg>
+        GCP
+      </button>
+      <button class="cloud-btn" id="awsBtn" onclick="switchCloud('aws')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 01-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 01-.287-.375 6.18 6.18 0 01-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.030-.375-1.277-.255-.248-.686-.368-1.3-.368-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 01-.28.104.488.488 0 01-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 01.224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 011.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 00-.735-.136 6.02 6.02 0 00-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.063-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 01-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 01.32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 01.311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 01-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 01-.303.08h-.687c-.151 0-.255-.025-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 01-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 00.415-.758.777.777 0 00-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 01-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.51.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 01.24.2.43.43 0 01.071.263v.375c0 .168-.064.256-.184.256a.83.83 0 01-.303-.096 3.652 3.652 0 00-1.532-.311c-.455 0-.815.072-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.248.327.368.702.368 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.743.167-1.158.167z" fill="#FF9900"/>
+        </svg>
+        AWS
+      </button>
+    </div>
+
+    <nav class="nav-menu">
+      <div class="nav-section-label">Overview</div>
+      <a href="#" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" data-page="models" onclick="navigateTo('models', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Models
+        <span class="badge">12</span>
+      </a>
+      <a href="#" class="nav-item" data-page="deploy" onclick="navigateTo('deploy', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        Deploy
+      </a>
+      <a href="#" class="nav-item" data-page="endpoints" onclick="navigateTo('endpoints', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Endpoints
+        <span class="badge success">5</span>
+      </a>
+      <div class="nav-section-label">Monitoring</div>
+      <a href="#" class="nav-item" data-page="metrics" onclick="navigateTo('metrics', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Metrics
+      </a>
+      <a href="#" class="nav-item" data-page="logs" onclick="navigateTo('logs', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Logs
+      </a>
+      <a href="#" class="nav-item" data-page="alerts" onclick="navigateTo('alerts', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alerts
+        <span class="badge warning">3</span>
+      </a>
+      <div class="nav-section-label">Infrastructure</div>
+      <a href="#" class="nav-item" data-page="pipelines" onclick="navigateTo('pipelines', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+        Pipelines
+      </a>
+      <a href="#" class="nav-item" data-page="storage" onclick="navigateTo('storage', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Storage
+      </a>
+      <a href="#" class="nav-item" data-page="settings" onclick="navigateTo('settings', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">P</div>
+        <div class="user-info">
+          <span class="user-name">Prachi</span>
+          <span class="user-role">ML Engineer</span>
+        </div>
+        <div class="user-status"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="mainContent">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-root" id="breadcrumbRoot">Dashboard</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current" id="breadcrumbCurrent">Overview</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="cloud-indicator" id="cloudIndicator">
+          <div class="cloud-dot gcp-dot"></div>
+          <span>GCP · us-central1</span>
+        </div>
+        <div class="header-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search models, endpoints..." id="searchInput" />
+        </div>
+        <button class="icon-btn" id="notifBtn" title="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge">3</span>
+        </button>
+        <button class="deploy-btn" onclick="openDeployModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Deploy Model
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content" id="pageContent">
+      <!-- Dashboard Page -->
+      <div class="page active" id="dashboardPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">ML Deployment <span class="gradient-text">Command Center</span></h1>
+            <p class="hero-sub">Real-time model monitoring across GCP Vertex AI and AWS SageMaker</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="openDeployModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              New Deployment
+            </button>
+            <button class="btn-secondary" onclick="navigateTo('metrics', document.querySelector('[data-page=metrics]'))">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              View Metrics
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card" id="kpi1">
+            <div class="kpi-icon purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+            <div class="kpi-body">
+              <span class="kpi-label">Active Models</span>
+              <span class="kpi-value" data-target="47">0</span>
+              <span class="kpi-change positive">↑ 8 this week</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 80 30" fill="none"><polyline points="0,25 15,20 30,22 45,12 60,15 75,5" stroke="url(#sp1)" stroke-width="2" fill="none"/><defs><linearGradient id="sp1" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+            </div>
+          </div>
+          <div class="kpi-card" id="kpi2">
+            <div class="kpi-icon cyan"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <div class="kpi-body">
+              <span class="kpi-label">Requests/min</span>
+              <span class="kpi-value" data-target="18423">0</span>
+              <span class="kpi-change positive">↑ 12.4%</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 80 30" fill="none"><polyline points="0,20 15,15 30,18 45,8 60,12 75,3" stroke="url(#sp2)" stroke-width="2" fill="none"/><defs><linearGradient id="sp2" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#06b6d4"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs></svg>
+            </div>
+          </div>
+          <div class="kpi-card" id="kpi3">
+            <div class="kpi-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="kpi-body">
+              <span class="kpi-label">Avg Latency</span>
+              <span class="kpi-value" data-target="42" data-suffix="ms">0</span>
+              <span class="kpi-change positive">↓ 8ms improved</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 80 30" fill="none"><polyline points="0,5 15,10 30,8 45,15 60,10 75,20" stroke="url(#sp3)" stroke-width="2" fill="none"/><defs><linearGradient id="sp3" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#10b981"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs></svg>
+            </div>
+          </div>
+          <div class="kpi-card" id="kpi4">
+            <div class="kpi-icon orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="kpi-body">
+              <span class="kpi-label">Cloud Cost/day</span>
+              <span class="kpi-value" data-target="284" data-prefix="$">0</span>
+              <span class="kpi-change negative">↑ $23 vs avg</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 80 30" fill="none"><polyline points="0,20 15,18 30,22 45,16 60,19 75,12" stroke="url(#sp4)" stroke-width="2" fill="none"/><defs><linearGradient id="sp4" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="chart-card large">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Request Volume & Latency</h3>
+                <p class="chart-sub">Last 24 hours · All endpoints</p>
+              </div>
+              <div class="chart-controls">
+                <button class="tab-btn active" onclick="setTimeRange('24h', this)">24h</button>
+                <button class="tab-btn" onclick="setTimeRange('7d', this)">7d</button>
+                <button class="tab-btn" onclick="setTimeRange('30d', this)">30d</button>
+              </div>
+            </div>
+            <canvas id="requestChart" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Model Distribution</h3>
+                <p class="chart-sub">By type</p>
+              </div>
+            </div>
+            <canvas id="modelDistChart" height="220"></canvas>
+            <div class="legend-grid" id="modelLegend"></div>
+          </div>
+        </div>
+
+        <!-- Models Table -->
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <h3 class="chart-title">Active Deployments</h3>
+              <p class="chart-sub">All running model endpoints</p>
+            </div>
+            <div class="table-controls">
+              <select class="select-ctrl" id="filterCloud">
+                <option value="all">All Clouds</option>
+                <option value="gcp">GCP Only</option>
+                <option value="aws">AWS Only</option>
+              </select>
+              <button class="btn-sm" onclick="refreshTable()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.68-7.93"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <table class="data-table" id="modelsTable">
+            <thead>
+              <tr>
+                <th>Model Name</th>
+                <th>Version</th>
+                <th>Cloud</th>
+                <th>Framework</th>
+                <th>Status</th>
+                <th>Latency</th>
+                <th>Req/min</th>
+                <th>Accuracy</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="modelsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Models Page -->
+      <div class="page" id="modelsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Model <span class="gradient-text">Registry</span></h1>
+            <p class="hero-sub">Manage and version your ML models across cloud providers</p>
+          </div>
+          <button class="btn-primary" onclick="openRegisterModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Register Model
+          </button>
+        </div>
+        <div class="model-cards-grid" id="modelCardsGrid"></div>
+      </div>
+
+      <!-- Deploy Page -->
+      <div class="page" id="deployPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Deploy <span class="gradient-text">Model</span></h1>
+            <p class="hero-sub">Configure and launch model deployments to GCP or AWS</p>
+          </div>
+        </div>
+        
+        <div class="charts-row" style="grid-template-columns: 1fr 1.2fr;">
+          <!-- Left Column: Setup Wizard -->
+          <div class="deploy-wizard" id="deployWizard"></div>
+
+          <!-- Right Column: Deployment Guides & IaC -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Cloud Deployment Guides</h3>
+                <p class="chart-sub">View automated scripts and Infrastructure as Code</p>
+              </div>
+              <div class="chart-controls">
+                <button class="tab-btn active" id="guideGcpBtn" onclick="setGuideTab('gcp')">GCP</button>
+                <button class="tab-btn" id="guideAwsBtn" onclick="setGuideTab('aws')">AWS</button>
+              </div>
+            </div>
+            
+            <div id="guideContent">
+              <!-- Content loaded dynamically via app.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endpoints Page -->
+      <div class="page" id="endpointsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">API <span class="gradient-text">Endpoints</span></h1>
+            <p class="hero-sub">Monitor and manage live inference endpoints</p>
+          </div>
+        </div>
+        
+        <div class="endpoints-grid" id="endpointsGrid"></div>
+
+        <!-- Inference Sandbox -->
+        <div class="table-card" style="margin-top: 24px; padding: 24px;">
+          <div class="chart-header" style="margin-bottom: 20px;">
+            <div>
+              <h3 class="chart-title">Live Inference Sandbox</h3>
+              <p class="chart-sub">Test model predictions against live or mock APIs</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="cloud-indicator" id="sandboxApiIndicator">
+                <div class="cloud-dot gcp-dot" style="background:#ef4444; box-shadow:0 0 6px #ef4444;"></div>
+                <span id="sandboxApiStatus">Local API: Checking...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+            <!-- Input Form -->
+            <form id="sandboxForm" onsubmit="runSandboxInference(event)">
+              <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                  <label class="form-label">Transaction Amount ($)</label>
+                  <input type="number" class="form-input" id="sb_amount" value="120.50" step="0.01" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Network Latency (ms)</label>
+                  <input type="number" class="form-input" id="sb_latency" value="45" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Distance to Merchant (miles)</label>
+                  <input type="number" class="form-input" id="sb_distance" value="12.4" step="0.1" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Device Security Score</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="range" class="form-input" id="sb_device_score" min="0" max="1" step="0.01" value="0.95" oninput="document.getElementById('sb_device_val').innerText = this.value" style="flex:1; padding:0;" />
+                    <span id="sb_device_val" style="font-size:12px; font-weight:600; width:30px;">0.95</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Recent Transactions (last 1h)</label>
+                  <input type="number" class="form-input" id="sb_velocity" value="2" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Account Age (days)</label>
+                  <input type="number" class="form-input" id="sb_age" value="450" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Category Risk Factor</label>
+                  <select class="form-select" id="sb_category_risk">
+                    <option value="0.05">Low (Retail / Groceries)</option>
+                    <option value="0.15" selected>Medium (Electronics / Travel)</option>
+                    <option value="0.65">High (Crypto / Cash Out)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex-direction:row; align-items:center; justify-content:space-between; margin-top:22px;">
+                  <label class="form-label">Country Matches Billing?</label>
+                  <div class="toggle on" id="sb_country_match" onclick="this.classList.toggle('on')"></div>
+                </div>
+              </div>
+              
+              <button type="submit" class="btn-primary" style="margin-top: 20px; width:100%; justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Send Prediction Request
+              </button>
+            </form>
+
+            <!-- Results Panel -->
+            <div class="review-panel" style="display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:280px; position:relative; overflow:hidden;">
+              <div id="sandboxLoading" style="display:none; position:absolute; inset:0; background:rgba(13,18,36,0.8); backdrop-filter:blur(4px); z-index:10; align-items:center; justify-content:center; flex-direction:column; gap:10px;">
+                <div class="cloud-dot gcp-dot" style="width:24px; height:24px; animation:pulse 1s infinite;"></div>
+                <span style="font-size:12px; font-weight:600; color:var(--text-secondary)">Calculating Fraud Risk...</span>
+              </div>
+
+              <div id="sandboxPlaceholder" style="text-align:center;">
+                <span style="font-size:48px;">🔬</span>
+                <h4 style="font-size:15px; font-weight:700; margin-top:10px;">Awaiting Transaction Data</h4>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:4px; max-width:180px;">Enter values and run inference to analyze fraud indicators.</p>
+              </div>
+
+              <div id="sandboxResult" style="display:none; width:100%; text-align:center;">
+                <span class="status-badge" id="resultStatusBadge" style="font-size:14px; padding:6px 16px; margin-bottom:14px;">NORMAL</span>
+                
+                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">Fraud Probability</div>
+                <div style="font-size:36px; font-weight:800; line-height:1; margin-bottom:12px;" id="resultProbText">12.5%</div>
+                
+                <div class="progress-bar" style="height:8px; border-radius:4px; margin: 0 auto 20px; max-width:200px;">
+                  <div class="progress-fill" id="resultProbBar" style="width:12.5%;"></div>
+                </div>
+
+                <div style="text-align:left; border-top:1px solid var(--bg-border); padding-top:16px; font-size:12px;">
+                  <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="color:var(--text-muted)">Serving API:</span>
+                    <span id="resultServingApi" style="font-weight:600; color:var(--cyan)">Mock Sandbox API</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-muted)">Response Time:</span>
+                    <span id="resultTime" style="font-weight:600; color:var(--green)">14ms</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Page -->
+      <div class="page" id="metricsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Performance <span class="gradient-text">Metrics</span></h1>
+            <p class="hero-sub">Detailed performance analytics and model drift detection</p>
+          </div>
+        </div>
+        <div class="metrics-grid" id="metricsGrid"></div>
+      </div>
+
+      <!-- Logs Page -->
+      <div class="page" id="logsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">System <span class="gradient-text">Logs</span></h1>
+            <p class="hero-sub">Real-time streaming logs from all deployments</p>
+          </div>
+        </div>
+        <div class="logs-container" id="logsContainer"></div>
+      </div>
+
+      <!-- Alerts Page -->
+      <div class="page" id="alertsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Alert <span class="gradient-text">Center</span></h1>
+            <p class="hero-sub">Configure thresholds and view active alerts</p>
+          </div>
+        </div>
+        <div id="alertsList"></div>
+      </div>
+
+      <!-- Pipelines Page -->
+      <div class="page" id="pipelinesPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">ML <span class="gradient-text">Pipelines</span></h1>
+            <p class="hero-sub">Automated training and deployment pipelines</p>
+          </div>
+        </div>
+        <div id="pipelinesList"></div>
+      </div>
+
+      <!-- Storage Page -->
+      <div class="page" id="storagePage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Model <span class="gradient-text">Storage</span></h1>
+            <p class="hero-sub">GCS Buckets and S3 model artifact management</p>
+          </div>
+        </div>
+        <div id="storageList"></div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="settingsPage">
+        <div class="page-hero">
+          <div class="hero-text">
+            <h1 class="hero-title">Platform <span class="gradient-text">Settings</span></h1>
+            <p class="hero-sub">Configure cloud credentials and platform preferences</p>
+          </div>
+        </div>
+        <div id="settingsContent"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Deploy Modal -->
+  <div class="modal-overlay" id="deployModal">
+    <div class="modal" id="deployModalContent">
+      <div class="modal-header">
+        <h2 class="modal-title">Deploy New Model</h2>
+        <button class="modal-close" onclick="closeDeployModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-step" id="step1">
+          <h3 class="step-title">Step 1: Select Cloud Provider</h3>
+          <div class="cloud-select-grid">
+            <div class="cloud-option active" id="gcpOption" onclick="selectCloudOption('gcp')">
+              <div class="cloud-option-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 6.08c3.23 0 6.05 1.47 7.93 3.77L23 6.78C20.66 3.43 16.58 1 12 1 7.43 1 3.35 3.43 1 6.78l3.07 3.07C5.95 7.55 8.77 6.08 12 6.08z" fill="#EA4335"/><path d="M22.99 12c0-.88-.09-1.74-.25-2.57L12 9.43v4.57h6.15c-.65 3.06-2.86 5.39-5.75 6.43l3.1 3.1C19.36 21.44 22.99 17.1 22.99 12z" fill="#4285F4"/><path d="M5.09 15.77C4.72 14.6 4.5 13.33 4.5 12c0-1.33.22-2.6.59-3.77L2.01 5.18C.72 7.18 0 9.51 0 12c0 2.49.72 4.82 2.01 6.82l3.08-3.05z" fill="#FBBC05"/><path d="M12 23c3.23 0 6.05-1.23 8.12-3.23l-3.1-3.1C15.71 17.55 13.95 18 12 18c-3.45 0-6.36-2.33-7.37-5.5L1.51 15.6C3.85 19.75 7.67 23 12 23z" fill="#34A853"/></svg>
+              </div>
+              <span class="cloud-option-name">Google Cloud Platform</span>
+              <span class="cloud-option-service">Vertex AI</span>
+            </div>
+            <div class="cloud-option" id="awsOption" onclick="selectCloudOption('aws')">
+              <div class="cloud-option-icon">
+                <svg width="40" height="40" viewBox="0 0 80 80"><text y="55" font-size="50" fill="#FF9900">⬢</text></svg>
+              </div>
+              <span class="cloud-option-name">Amazon Web Services</span>
+              <span class="cloud-option-service">SageMaker</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-step" id="step2">
+          <h3 class="step-title">Step 2: Model Configuration</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Model Name</label>
+              <input type="text" class="form-input" id="modelName" placeholder="e.g. fraud-detection-v3" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Framework</label>
+              <select class="form-select" id="framework">
+                <option>TensorFlow 2.x</option>
+                <option>PyTorch 2.x</option>
+                <option>scikit-learn</option>
+                <option>XGBoost</option>
+                <option>Hugging Face</option>
+                <option>ONNX</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Model URI / Artifact Path</label>
+              <input type="text" class="form-input" id="modelUri" placeholder="gs://bucket/model/ or s3://bucket/model/" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instance Type</label>
+              <select class="form-select" id="instanceType">
+                <option>n1-standard-4 (4 vCPU, 15GB)</option>
+                <option>n1-highmem-8 (8 vCPU, 52GB)</option>
+                <option>a2-highgpu-1g (GPU T4)</option>
+                <option>a2-ultragpu-1g (GPU A100)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Min Replicas</label>
+              <input type="number" class="form-input" id="minReplicas" value="1" min="0" max="100" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Max Replicas</label>
+              <input type="number" class="form-input" id="maxReplicas" value="10" min="1" max="500" />
+            </div>
+          </div>
+        </div>
+        <div class="form-step" id="step3">
+          <h3 class="step-title">Step 3: Review & Deploy</h3>
+          <div class="review-panel" id="reviewPanel"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="step-indicator">
+          <div class="step-dot active" id="dot1"></div>
+          <div class="step-dot" id="dot2"></div>
+          <div class="step-dot" id="dot3"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ghost" id="prevBtn" onclick="prevStep()" style="display:none">Back</button>
+          <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

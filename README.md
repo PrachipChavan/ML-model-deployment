@@ -1,4 +1,5 @@
 # ML Model Deployment Template — GCP & AWS
+<img width="1917" height="902" alt="Screenshot 2026-07-18 103955" src="https://github.com/user-attachments/assets/53412f3e-9e4b-4a9b-a016-2cc3743ca0e9" />
 
 A production-grade, interactive template and dashboard for deploying Machine Learning models to Google Cloud Platform (GCP) and Amazon Web Services (AWS). It features a complete pipeline: local model training, local containerized serving (FastAPI + Docker), cloud deployment scripts (gcloud, boto3/sagemaker), Infrastructure as Code (Terraform), and a premium frontend monitoring dashboard with a live inference sandbox.
 
@@ -149,11 +150,7 @@ terraform plan
 terraform apply
 ```
 
----
 
-## 📊 Frontend Dashboard Integration & Inference Sandbox
-
-The root directory contains a premium frontend interface to monitor active cloud deployments and try out model queries.
 
 ### Sandbox Testing Client
 When running the dashboard, the page automatically polls `localhost:8080`.
